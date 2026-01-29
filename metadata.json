@@ -1,0 +1,5 @@
+{
+  "name": "Prezto Pizza Online",
+  "description": "An online ordering web application for Prezto Pizza, allowing customers to browse the menu, build a cart, and complete their order via a Telegram bot integration.",
+  "requestFramePermissions": []
+}
