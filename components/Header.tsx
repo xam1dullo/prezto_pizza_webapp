@@ -19,7 +19,7 @@ const CartIcon = () => (
     </svg>
 );
 
-const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount }) => {
+const Header: React.FC<HeaderProps> = React.memo(({ onCartClick, cartItemCount }) => {
   return (
     <header className="bg-surface/95 backdrop-blur-sm shadow-lg sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -27,8 +27,8 @@ const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount }) => {
           <PizzaIcon />
           <span className="text-2xl font-bold font-serif text-primary">Prezto Pizza</span>
         </a>
-        <button 
-          onClick={onCartClick} 
+        <button
+          onClick={onCartClick}
           className="relative text-text hover:text-primary transition-colors duration-200 p-2 rounded-full hover:bg-primary/10"
           aria-label="Open shopping cart"
         >
@@ -42,6 +42,8 @@ const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount }) => {
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header;

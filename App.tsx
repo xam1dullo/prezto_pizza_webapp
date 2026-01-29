@@ -6,6 +6,7 @@ import Cart from './components/Cart';
 import Footer from './components/Footer';
 import CategoryFilter from './components/CategoryFilter';
 import CheckoutModal from './components/CheckoutModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { type MenuItem as MenuItemType, type CartItem as CartItemType } from './types';
 import { MENU_ITEMS } from './constants';
 
@@ -70,53 +71,45 @@ export default function App() {
     setIsCheckoutModalOpen(false);
   }, []);
 
-  const handleConfirmOrder = useCallback(async (phoneNumber: string) => {
+  const generateTelegramQuery = useCallback(() => {
+    // Mahsulot nomi = soni formatida query string
+    const items = cartItems.map(item => `${encodeURIComponent(item.name)}=${item.quantity}`).join('&');
+    return items;
+  }, [cartItems]);
+
+  const handleConfirmOrder = useCallback(async () => {
     setIsSubmittingOrder(true);
 
-    const orderDetails = {
-      phone: phoneNumber,
-      items: cartItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      totalPrice: cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
-    };
-
-    // BACKEND INTEGRATION:
-    // Bu yerda buyurtma ma'lumotlari sizning serveringizga yuboriladi.
-    // Server esa bu ma'lumotlarni qabul qilib, Telegram bot orqali adminga yuborishi kerak.
-    // '/api/send-order-to-telegram' - bu sizning serveringizdagi manzil (endpoint) bo'lishi kerak.
     try {
+      // Telegram bot uchun query yaratish
+      const telegramQuery = generateTelegramQuery();
+      const telegramBotUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'your_bot_username';
+      const telegramUrl = `https://t.me/${telegramBotUsername}?startapp=${encodeURIComponent(telegramQuery)}`;
 
-      console.log(orderDetails)
-      // const response = await fetch('/api/send-order-to-telegram', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(orderDetails),
-      // });
+      console.log('Telegram URL:', telegramUrl);
+      console.log('Query data:', telegramQuery);
 
-      // if (!response.ok) {
-      //   // Agar server xatolik bilan javob bersa, xatoni `catch` blokiga otamiz
-      //   throw new Error('Serverda xatolik yuz berdi');
-      // }
+      // Debug uchun buyurtma ma'lumotlari
+      console.log('Telegram Query:', telegramQuery);
+      console.log('Decoded Query:', decodeURIComponent(telegramQuery));
+      console.log('Items:', cartItems.map(item => `${item.name}: ${item.quantity}ta`));
 
-      // Agar buyurtma muvaffaqiyatli yuborilsa
+      // Telegram botga yo'naltirish
+      window.open(telegramUrl, '_blank');
+
+      // Buyurtma muvaffaqiyatli amalga oshirildi
       setIsCheckoutModalOpen(false);
       setIsCartOpen(false);
       handleClearCart();
-      alert('Rahmat! Buyurtmangiz qabul qilindi. Tez orada siz bilan bog\'lanamiz.');
+      alert('Rahmat! Buyurtmangiz Telegram orqali yuborildi. Bot sizga javob beradi.');
 
     } catch (error) {
       console.error('Buyurtmani yuborishda xatolik:', error);
-      alert('Kechirasiz, buyurtmani yuborishda xatolik yuz berdi. Iltimos, qayta urinib ko\'ring yoki biz bilan bog\'laning.');
+      alert('Kechirasiz, buyurtmani yuborishda xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.');
     } finally {
       setIsSubmittingOrder(false);
     }
-  }, [cartItems, handleClearCart]);
+  }, [cartItems, handleClearCart, generateTelegramQuery]);
 
 
   const totalCartItems = useMemo(() => {
@@ -131,35 +124,37 @@ export default function App() {
   }, [selectedCategory]);
 
   return (
-    <div className="bg-gradient-to-br from-background to-gray-50 min-h-screen font-sans text-text flex flex-col">
-      <Header onCartClick={handleToggleCart} cartItemCount={totalCartItems} />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif text-primary mb-2">Bizning ajoyib menyu</h1>
-          <p className="text-lg text-gray-600">Sevgi va eng yaxshi masalliqlar bilan tayyorlangan.</p>
-        </div>
-        <CategoryFilter 
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+    <ErrorBoundary>
+      <div className="bg-gradient-to-br from-background to-gray-50 min-h-screen font-sans text-text flex flex-col">
+        <Header onCartClick={handleToggleCart} cartItemCount={totalCartItems} />
+        <main className="flex-grow container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold font-serif text-primary mb-2">Bizning ajoyib menyu</h1>
+            <p className="text-lg text-gray-600">Sevgi va eng yaxshi masalliqlar bilan tayyorlangan.</p>
+          </div>
+          <CategoryFilter
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+          <MenuList menuItems={filteredMenuItems} onAddToCart={handleAddToCart} />
+        </main>
+        <Cart
+          isOpen={isCartOpen}
+          onClose={handleToggleCart}
+          cartItems={cartItems}
+          onUpdateQuantity={handleUpdateQuantity}
+          onClearCart={handleClearCart}
+          onCheckout={handleOpenCheckoutModal}
         />
-        <MenuList menuItems={filteredMenuItems} onAddToCart={handleAddToCart} />
-      </main>
-      <Cart 
-        isOpen={isCartOpen}
-        onClose={handleToggleCart}
-        cartItems={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onClearCart={handleClearCart}
-        onCheckout={handleOpenCheckoutModal}
-      />
-      <CheckoutModal
-        isOpen={isCheckoutModalOpen}
-        onClose={handleCloseCheckoutModal}
-        onSubmit={handleConfirmOrder}
-        isSubmitting={isSubmittingOrder}
-      />
-      <Footer />
-    </div>
+        <CheckoutModal
+          isOpen={isCheckoutModalOpen}
+          onClose={handleCloseCheckoutModal}
+          onSubmit={handleConfirmOrder}
+          isSubmitting={isSubmittingOrder}
+        />
+        <Footer />
+      </div>
+    </ErrorBoundary>
   );
 }

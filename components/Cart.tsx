@@ -45,18 +45,32 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose, cartItems, onUpdateQuantit
           ) : (
             <div className="flex-grow overflow-y-auto p-4 space-y-4">
               {cartItems.map(item => (
-                <div key={item.id} className="flex items-center gap-4 bg-surface p-2 rounded-lg shadow-sm">
-                  <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-md"/>
+                <div key={item.id} className="flex items-center gap-4 bg-surface p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                  <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-lg"/>
                   <div className="flex-grow">
-                    <p className="font-bold">{item.name}</p>
+                    <p className="font-bold text-gray-800">{item.name}</p>
                     <p className="text-sm text-gray-500">{item.price.toLocaleString('uz-UZ')} so'm</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => onUpdateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 bg-gray-200 rounded-full font-bold">-</button>
-                    <span>{item.quantity}</span>
-                    <button onClick={() => onUpdateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 bg-gray-200 rounded-full font-bold">+</button>
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-200">
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        className="w-8 h-8 bg-white rounded-full font-bold text-gray-600 hover:text-red-500 hover:bg-red-50 transition-all duration-200 flex items-center justify-center shadow-sm border border-gray-200 hover:border-red-200 active:scale-95"
+                        aria-label="Kamayitirish"
+                      >
+                        −
+                      </button>
+                      <span className="mx-3 font-semibold text-gray-800 min-w-[24px] text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        className="w-8 h-8 bg-white rounded-full font-bold text-gray-600 hover:text-green-500 hover:bg-green-50 transition-all duration-200 flex items-center justify-center shadow-sm border border-gray-200 hover:border-green-200 active:scale-95"
+                        aria-label="Ko'paytirish"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="font-bold text-primary text-sm">{(item.price * item.quantity).toLocaleString('uz-UZ')} so'm</p>
                   </div>
-                  <p className="font-semibold w-24 text-right">{(item.price * item.quantity).toLocaleString('uz-UZ')} so'm</p>
                 </div>
               ))}
             </div>

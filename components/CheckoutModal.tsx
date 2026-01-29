@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (phoneNumber: string) => void;
+  onSubmit: () => void;
   isSubmitting: boolean;
 }
 
@@ -17,47 +17,12 @@ const LoadingSpinner = () => (
 
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
-  const [phoneNumber, setPhoneNumber] = useState('+998 ');
-  const [isTouched, setIsTouched] = useState(false);
-
-  // Validates a number like +998901234567 (13 digits total)
-  const isPhoneNumberValid = phoneNumber.replace(/ /g, '').length === 13;
-  const isInvalid = isTouched && !isPhoneNumberValid;
-
-  useEffect(() => {
-    // Reset state when modal opens/closes
-    if (isOpen) {
-      setPhoneNumber('+998 ');
-      setIsTouched(false);
-    }
-  }, [isOpen]);
-
   if (!isOpen) {
     return null;
   }
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Basic formatting for Uzbek phone numbers
-    let formatted = '+998';
-    const numbers = value.replace(/\D/g, '').substring(3); // remove non-digits, except for country code
-    
-    if (numbers.length > 0) formatted += ' ' + numbers.substring(0, 2);
-    if (numbers.length > 2) formatted += ' ' + numbers.substring(2, 5);
-    if (numbers.length > 5) formatted += ' ' + numbers.substring(5, 7);
-    if (numbers.length > 7) formatted += ' ' + numbers.substring(7, 9);
-    
-    if (formatted.length <= 17) {
-        setPhoneNumber(formatted);
-    }
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsTouched(true);
-    if (isPhoneNumberValid) {
-        onSubmit(phoneNumber);
-    }
+  const handleSubmit = () => {
+    onSubmit();
   };
   
   return (
@@ -70,55 +35,26 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSubmit
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold font-serif text-primary">Buyurtmani tasdiqlash</h2>
-            <button onClick={onClose} className="p-2 text-3xl leading-none rounded-full hover:bg-gray-100">&times;</button>
+          <h2 className="text-2xl font-bold font-serif text-primary">Buyurtmani tasdiqlash</h2>
+          <button onClick={onClose} className="p-2 text-3xl leading-none rounded-full hover:bg-gray-100">&times;</button>
         </div>
-        
-        <p className="text-gray-600 mb-6">Buyurtmani yakunlash uchun telefon raqamingizni kiriting. Operatorimiz siz bilan bog'lanadi.</p>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label htmlFor="phone" className="block text-sm font-bold text-text mb-2">Telefon raqam</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              onBlur={() => setIsTouched(true)}
-              placeholder="+998 90 123 45 67"
-              className={`w-full px-4 py-3 bg-white text-text border rounded-lg focus:ring-2 transition-all ${
-                isInvalid 
-                ? 'border-red-500 focus:ring-red-500/50' 
-                : 'border-gray-300 focus:ring-primary/50 focus:border-primary'
-              }`}
-              required
-              autoFocus
-            />
-            {isInvalid && (
-              <p className="text-red-600 text-sm mt-2">Iltimos, to'g'ri telefon raqam kiriting. (Masalan: +998 90 123 45 67)</p>
-            )}
-          </div>
-          
-          <div className="flex flex-col sm:flex-row-reverse gap-3">
-            <button
-              type="submit"
-              disabled={!isPhoneNumberValid || isSubmitting}
-              className="w-full flex justify-center items-center bg-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {isSubmitting && <LoadingSpinner />}
-              {isSubmitting ? 'Yuborilmoqda...' : 'Tasdiqlash'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-300 disabled:opacity-50"
-            >
-              Bekor qilish
-            </button>
-          </div>
-        </form>
+
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-4">📱</div>
+          <p className="text-gray-600 mb-2">Buyurtmangizni Telegram orqali yubormoqchimisiz?</p>
+          <p className="text-sm text-gray-500">Bot sizga buyurtma tafsilotlarini yuboradi va telefon raqamingizni so'raydi.</p>
+        </div>
+
+        <div className="flex justify-center">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full flex justify-center items-center bg-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isSubmitting && <LoadingSpinner />}
+            {isSubmitting ? 'Telegramga yo\'naltirilmoqda...' : '✅ Telegramga yuborish'}
+          </button>
+        </div>
       </div>
        <style>{`
         @keyframes fade-in-up {

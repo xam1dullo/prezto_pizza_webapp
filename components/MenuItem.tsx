@@ -15,17 +15,27 @@ const AddToCartIcon = () => (
 );
 
 
-const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToCart }) => {
+const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, onAddToCart }) => {
   return (
     <div className="bg-surface rounded-lg shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:scale-105 hover:shadow-2xl group">
       <div className="aspect-square overflow-hidden">
-        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+        <img
+          src={item.imageUrl}
+          alt={item.name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+        />
       </div>
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-4 gap-2">
-            <h3 className="text-xl font-bold font-serif text-text">{item.name}</h3>
-            <span className="text-lg font-semibold text-primary whitespace-nowrap">{item.price.toLocaleString('uz-UZ')} so'm</span>
+          <h3 className="text-xl font-bold font-serif text-text">{item.name}</h3>
+          <span className="text-lg font-semibold text-primary whitespace-nowrap">
+            {item.price.toLocaleString('uz-UZ')} so'm
+          </span>
         </div>
+        {item.description && (
+          <p className="text-gray-600 text-sm mb-4 flex-grow">{item.description}</p>
+        )}
         <button
           onClick={() => onAddToCart(item)}
           className="mt-auto w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-red-500 transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:-translate-y-1"
@@ -36,6 +46,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onAddToCart }) => {
       </div>
     </div>
   );
-};
+});
+
+MenuItem.displayName = 'MenuItem';
 
 export default MenuItem;

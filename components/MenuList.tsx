@@ -8,7 +8,7 @@ interface MenuListProps {
   onAddToCart: (item: MenuItemType) => void;
 }
 
-const MenuList: React.FC<MenuListProps> = ({ menuItems, onAddToCart }) => {
+const MenuList: React.FC<MenuListProps> = React.memo(({ menuItems, onAddToCart }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {menuItems.map(item => (
@@ -16,6 +16,8 @@ const MenuList: React.FC<MenuListProps> = ({ menuItems, onAddToCart }) => {
       ))}
     </div>
   );
-};
+});
+
+MenuList.displayName = 'MenuList';
 
 export default MenuList;
